@@ -23,46 +23,51 @@ async function getPayload(token: string, secret: string) {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  const token = request.cookies.get(COOKIE_NAME)?.value
+  try {
+    const { pathname } = request.nextUrl
+    const token = request.cookies.get(COOKIE_NAME)?.value
 
-  const isPublicRoute = PUBLIC_ROUTES.includes(pathname)
-  const isTeacherRoute =
-    pathname.startsWith('/teacher') ||
-    pathname === TEACHER_ROUTE_PREFIX
+    const isPublicRoute = PUBLIC_ROUTES.includes(pathname)
+    const isTeacherRoute =
+      pathname.startsWith('/teacher') ||
+      pathname === TEACHER_ROUTE_PREFIX
 
-  const jwtSecret = process.env.JWT_SECRET ?? ''
+    const jwtSecret = process.env.JWT_SECRET ?? ''
 
-  if (isPublicRoute) {
-    if (token && jwtSecret) {
-      const payload = await getPayload(token, jwtSecret)
-      if (payload) {
-        const dest = payload.role === 'teacher' ? '/teacher' : '/dashboard'
-        return NextResponse.redirect(new URL(dest, request.url))
+    if (isPublicRoute) {
+      if (token && jwtSecret) {
+        const payload = await getPayload(token, jwtSecret)
+        if (payload) {
+          const dest = payload.role === 'teacher' ? '/teacher' : '/dashboard'
+          return NextResponse.redirect(new URL(dest, request.url))
+        }
       }
+      return NextResponse.next()
     }
+
+    if (!token || !jwtSecret) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('from', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    const payload = await getPayload(token, jwtSecret)
+
+    if (!payload) {
+      const response = NextResponse.redirect(new URL('/login', request.url))
+      response.cookies.delete(COOKIE_NAME)
+      return response
+    }
+
+    if (isTeacherRoute && payload.role !== 'teacher') {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
     return NextResponse.next()
+  } catch (error) {
+    // On error, redirect to login instead of crashing
+    return NextResponse.redirect(new URL('/login', request.url))
   }
-
-  if (!token || !jwtSecret) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('from', pathname)
-    return NextResponse.redirect(loginUrl)
-  }
-
-  const payload = await getPayload(token, jwtSecret)
-
-  if (!payload) {
-    const response = NextResponse.redirect(new URL('/login', request.url))
-    response.cookies.delete(COOKIE_NAME)
-    return response
-  }
-
-  if (isTeacherRoute && payload.role !== 'teacher') {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
-
-  return NextResponse.next()
 }
 
 export const config = {
