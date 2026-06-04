@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdf2md"
+version = "1.0.0"
+description = "Hindi PDF → Markdown converter with OCR (EasyOCR + Claude Vision)"
+requires-python = ">=3.9"
+dependencies = [
+    "pdf2image>=1.17.0",
+    "Pillow>=10.0.0",
+    "easyocr>=1.7.0",
+    "anthropic>=0.40.0",
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "tqdm>=4.66.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+tesseract = ["pytesseract>=0.3.13"]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+]
+
+[project.scripts]
+pdf2md = "pdf2md.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pdf2md*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"

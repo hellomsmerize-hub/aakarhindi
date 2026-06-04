@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aakar-hindi",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["/tmp/serve-aakar.sh"],
+      "port": 3456
+    }
+  ]
+}

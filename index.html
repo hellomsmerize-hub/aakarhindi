@@ -1,0 +1,2831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aakar Hindi — Master Hindi. Excel in Exams.</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+// All Hindi data lives here — outside Babel transform to avoid parser issues with Devanagari strings
+window.APP_DATA = {
+  TRACKS: {
+    psle: { id:"psle", label:"PSLE Hindi", grades:"Primary 3 – 6", color:"#1a237e", accent:"#ff6f00", icon:"📚", examBoard:"MOE Singapore", description:"Comprehensive PSLE Hindi prep with 800+ questions, 50 exam papers per level" },
+    olevel: { id:"olevel", label:"O-Level Hindi", grades:"Secondary 1 – 4", color:"#0d1b4b", accent:"#ff9800", icon:"🎓", examBoard:"Singapore-Cambridge", description:"500+ cloze passages, 1000+ vocabulary, Sandhi rules with full exam simulation" }
+  },
+  LEVELS: [
+    { id:"foundational", label:"Foundational", hindi:"आधारभूत", color:"#4caf50", locked:false, progress:68, topics:24, papers:50, questions:100 },
+    { id:"advanced", label:"Advanced", hindi:"उन्नत", color:"#1a237e", locked:true, progress:0, topics:31, papers:50, questions:100 },
+    { id:"expert", label:"Expert", hindi:"विशेषज्ञ", color:"#b71c1c", locked:true, progress:0, topics:38, papers:50, questions:100 }
+  ],
+  MODULES: [
+    { id:"grammar", label:"Grammar", hindi:"व्याकरण", icon:"📝", color:"#1a237e", bg:"#e8eaf6",
+      topics:[
+        { name:"Sentence Structure", hindi:"वाक्य संरचना", done:true, score:88 },
+        { name:"Prepositions", hindi:"परसर्ग / कारक", done:true, score:76 },
+        { name:"Verbs & Tenses", hindi:"क्रिया और काल", done:false, score:null },
+        { name:"Adjectives", hindi:"विशेषण", done:false, score:null },
+        { name:"Adverbs", hindi:"क्रिया विशेषण", done:false, score:null },
+        { name:"Synonyms & Opposites", hindi:"पर्यायवाची / विलोम", done:false, score:null },
+        { name:"Idioms & Proverbs", hindi:"मुहावरे और लोकोक्तियाँ", done:false, score:null }
+      ]
+    },
+    { id:"vocabulary", label:"Vocabulary", hindi:"शब्द भंडार", icon:"📖", color:"#4a148c", bg:"#f3e5f5",
+      topics:[
+        { name:"Word Meanings", hindi:"शब्द अर्थ", done:true, score:91 },
+        { name:"Word Pairs", hindi:"शब्द युग्म", done:true, score:83 },
+        { name:"Similar Words", hindi:"समरूपी शब्द", done:false, score:null },
+        { name:"Proverbs (800–1000)", hindi:"लोकोक्तियाँ", done:false, score:null },
+        { name:"Idioms Collection", hindi:"मुहावरे संग्रह", done:false, score:null }
+      ]
+    },
+    { id:"comprehension", label:"Comprehension", hindi:"बोधगम्यता", icon:"🔍", color:"#e65100", bg:"#fff3e0",
+      topics:[
+        { name:"MCQ Comprehension", hindi:"बहुविकल्पीय बोध", done:true, score:72 },
+        { name:"Open-ended Response", hindi:"खुले प्रश्न", done:false, score:null },
+        { name:"Cloze Passages (500)", hindi:"रिक्त स्थान परीक्षण", done:false, score:null }
+      ]
+    },
+    { id:"writing", label:"Writing", hindi:"लेखन", icon:"✍️", color:"#2e7d32", bg:"#e8f5e9",
+      topics:[
+        { name:"Descriptive Writing", hindi:"वर्णनात्मक लेखन", done:false, score:null },
+        { name:"Narrative Writing", hindi:"कथात्मक लेखन", done:false, score:null },
+        { name:"Formal Letter", hindi:"औपचारिक पत्र", done:false, score:null },
+        { name:"Essay Writing (200+)", hindi:"निबंध लेखन", done:false, score:null }
+      ]
+    }
+  ],
+  QUIZ_QUESTIONS: [
+    { id:1, type:"mcq",
+      question:"निम्नलिखित वाक्य में रेखांकित शब्द का पर्यायवाची चुनिए:",
+      context:"वह एक __साहसी__ व्यक्ति था।",
+      options:["निडर","कायर","आलसी","दुखी"],
+      correct:0,
+      explanation:"<b>साहसी</b> का पर्यायवाची <b>निडर</b> है। इसका अर्थ है जो डर से मुक्त हो और जोखिम उठाने में सक्षम हो। “कायर” विलोम है।",
+      explanationEn:'"Sahasi" means brave. Its synonym is "Nidar" meaning fearless. "Kayar" is the antonym (coward).'
+    },
+    { id:2, type:"mcq",
+      question:"रिक्त स्थान में उचित शब्द भरिए:",
+      context:"राम _______ खेलने गया।",
+      options:["से","को","पर","में"],
+      correct:0,
+      explanation:"<b>से</b> यहाँ सही कारक चिह्न है। यह अपादान कारक को दर्शाता है।",
+      explanationEn:'"Se" is the correct postposition indicating the starting point of an action (Apadan Karak).'
+    },
+    { id:3, type:"mcq",
+      question:"निम्नलिखित में से कौन-सा शब्द <b>संज्ञा</b> नहीं है?",
+      context:null,
+      options:["पहाड़","दौड़ना","नदी","बच्चा"],
+      correct:1,
+      explanation:"<b>दौड़ना</b> एक क्रिया (verb) है, संज्ञा नहीं। पहाड़, नदी और बच्चा सभी संज्ञाएँ हैं।",
+      explanationEn:'"Daudna" = to run — a verb. The rest are nouns: mountain, river, child.'
+    },
+    { id:4, type:"mcq",
+      question:"मुहावरे का अर्थ बताइए: <b>नाक में दम करना</b>",
+      context:null,
+      options:["बहुत परेशान करना","बहुत प्रसन्न होना","नाक बंद होनऺ","धूल उड़ाना"],
+      correct:0,
+      explanation:"<b>नाक में दम करना</b> मुहावरे का अर्थ है किसी को बहुत अधिक परेशान करना। उदाहरण: “बच्चों ने माँ की नाक में दम कर दिया।”",
+      explanationEn:'"Naak mein dum karna" = to pester/bother excessively. Lit: fill breath in nose, fig: suffocate with annoyance.'
+    },
+    { id:5, type:"mcq",
+      question:"निम्नलिखित वाक्य में काल पहचानिए:",
+      context:"“वह कल बाज़ार जाएगा।”",
+      options:["भविष्यकाल","भूतकाल","वर्तमानकाल","सामान्य काल"],
+      correct:0,
+      explanation:"<b>जाएगा</b> भविष्यकाल (Future Tense) को दर्शाता है। “कल” शब्द भी भविष्य का संकेत देता है।",
+      explanationEn:'"Jaayega" = will go. Future Tense. "Kal" (tomorrow) also confirms future time.'
+    }
+  ],
+  EXAM_QUESTIONS: [
+    { section:"Grammar", q:"रिक्त स्थान में उचित <b>कारक</b> चिह्न भरिए: “मेज़ _____ किताब रखी है।”", options:["पर","में","से","को"], correct:0 },
+    { section:"Grammar", q:"“वह बाज़ार जाती है।” इस वाक्य को <b>भूतकाल</b> में बदलिए:", options:["वह बाज़ार गई।","वह बाज़ार जाएगी।","वह बाज़ार जा रही है।","वह बाज़ार जा सकती है।"], correct:0 },
+    { section:"Vocabulary", q:"<b>पर्वत</b> का पर्यायवाची शब्द कौन-सा है?", options:["पहाड़","नदी","समुद्र","वन"], correct:0 },
+    { section:"Vocabulary", q:"“अंधेरा” का विलोम शब्द क्या है?", options:["उजाला","रात","काला","छाया"], correct:0 },
+    { section:"Comprehension", q:"गद्यांश के अनुसार लेखक का मुख्य उद्देश्य क्या था?", options:["पर्यावरण की रक्षा करना","धन कमाना","यात्रा करना","पुस्तक लिखना"], correct:0 },
+    { section:"Comprehension", q:"“हरे-भरे जंगल” में <b>विशेषण</b> शब्द पहचानिए:", options:["हरे-भरे","जंगल","दोनों","कोई नहीं"], correct:0 }
+  ],
+  RECENT_ACTIVITY: [
+    { label:"Grammar Quiz", score:88, time:"2h ago", icon:"📝" },
+    { label:"Vocab Practice", score:91, time:"1d ago", icon:"📖" },
+    { label:"Comprehension MCQ", score:72, time:"2d ago", icon:"🔍" },
+    { label:"Full Exam Paper #3", score:79, time:"3d ago", icon:"📋" }
+  ]
+};
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Tiro+Devanagari+Hindi:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d1b4b;
+    --blue: #1a237e;
+    --blue-mid: #283593;
+    --orange: #ff6f00;
+    --orange-light: #ff8f00;
+    --saffron: #ff9800;
+    --cream: #fffde7;
+    --gold: #f9a825;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'DM Sans', sans-serif; background: #f5f6fa; color: #1a1a2e; }
+  .hindi { font-family: 'Tiro Devanagari Hindi', serif; }
+  .display { font-family: 'DM Serif Display', serif; }
+  .yatra { font-family: 'Yatra One', cursive; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #f0f0f0; }
+  ::-webkit-scrollbar-thumb { background: #1a237e44; border-radius: 3px; }
+
+  /* Animations */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes shimmer { 0%,100%{opacity:.6} 50%{opacity:1} }
+  @keyframes pulse-ring { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(1.4);opacity:0} }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes progress-fill { from{width:0} to{width:var(--target)} }
+  @keyframes count-up { from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
+
+  .fade-up { animation: fadeUp .5s ease both; }
+  .fade-up-1 { animation: fadeUp .5s .1s ease both; }
+  .fade-up-2 { animation: fadeUp .5s .2s ease both; }
+  .fade-up-3 { animation: fadeUp .5s .3s ease both; }
+  .fade-up-4 { animation: fadeUp .5s .4s ease both; }
+  .float-anim { animation: float 3s ease-in-out infinite; }
+
+  .card-hover { transition: transform .2s, box-shadow .2s; }
+  .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(26,35,126,.15); }
+
+  /* Sidebar */
+  .sidebar { background: var(--navy); min-height: 100vh; }
+  .sidebar-link { transition: background .15s, color .15s; }
+  .sidebar-link:hover, .sidebar-link.active { background: rgba(255,111,0,.15); color: #ff9800; }
+  .sidebar-link.active { border-left: 3px solid var(--orange); }
+
+  /* Progress bar */
+  .progress-bar { background: #e8eaf6; border-radius: 999px; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, #1a237e, #ff6f00); border-radius: 999px; transition: width 1s ease; }
+
+  /* Level cards */
+  .level-locked { filter: grayscale(.6); opacity: .7; }
+  .level-card { transition: all .2s; cursor: pointer; }
+  .level-card:not(.locked):hover { transform: translateY(-4px); }
+
+  /* Quiz */
+  .option-btn { transition: all .15s; border: 2px solid #e8eaf6; }
+  .option-btn:hover:not(.answered) { border-color: #1a237e; background: #e8eaf6; }
+  .option-btn.correct { border-color: #2e7d32; background: #e8f5e9; color: #1b5e20; }
+  .option-btn.wrong { border-color: #c62828; background: #ffebee; color: #b71c1c; }
+  .option-btn.reveal { border-color: #2e7d32; background: #f1f8e9; }
+
+  /* Exam timer */
+  .timer-urgent { color: #c62828; animation: shimmer 1s ease infinite; }
+
+  /* Hero gradient */
+  .hero-bg {
+    background: linear-gradient(135deg, #0d1b4b 0%, #1a237e 40%, #283593 70%, #1a237e 100%);
+    position: relative; overflow: hidden;
+  }
+  .hero-bg::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Devanagari decorative */
+  .deva-watermark {
+    font-family: 'Tiro Devanagari Hindi', serif;
+    font-size: 200px; color: rgba(255,255,255,.03);
+    position: absolute; right: -20px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; line-height: 1;
+  }
+
+  /* Feature icons */
+  .feature-icon { width: 52px; height: 52px; border-radius: 14px; display:flex; align-items:center; justify-content:center; font-size: 24px; }
+
+  /* Badge */
+  .badge { display:inline-flex; align-items:center; gap:4px; padding: 2px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+
+  /* Streak fire */
+  .streak { background: linear-gradient(135deg, #ff6f00, #ff9800); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+</style>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        navy: '#0d1b4b', blue: '#1a237e', 'blue-mid': '#283593',
+        orange: '#ff6f00', saffron: '#ff9800', cream: '#fffde7', gold: '#f9a825'
+      }
+    }
+  }
+}
+</script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const {
+  useState,
+  useEffect,
+  useRef,
+  useCallback
+} = React;
+
+// ─── DATA (loaded from window.APP_DATA — defined in plain script above Babel) ──
+const {
+  TRACKS,
+  LEVELS,
+  MODULES,
+  QUIZ_QUESTIONS,
+  EXAM_QUESTIONS,
+  RECENT_ACTIVITY
+} = window.APP_DATA;
+
+// ─── ICONS ────────────────────────────────────────────────────────────────────
+const Icon = ({
+  name,
+  size = 18,
+  className = ''
+}) => {
+  const icons = {
+    lock: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      className: className
+    }, /*#__PURE__*/React.createElement("rect", {
+      x: "3",
+      y: "11",
+      width: "18",
+      height: "11",
+      rx: "2"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M7 11V7a5 5 0 0110 0v4"
+    })),
+    unlock: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      className: className
+    }, /*#__PURE__*/React.createElement("rect", {
+      x: "3",
+      y: "11",
+      width: "18",
+      height: "11",
+      rx: "2"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M7 11V7a5 5 0 019.9-1"
+    })),
+    check: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2.5",
+      className: className
+    }, /*#__PURE__*/React.createElement("polyline", {
+      points: "20 6 9 17 4 12"
+    })),
+    arrow: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      className: className
+    }, /*#__PURE__*/React.createElement("line", {
+      x1: "5",
+      y1: "12",
+      x2: "19",
+      y2: "12"
+    }), /*#__PURE__*/React.createElement("polyline", {
+      points: "12 5 19 12 12 19"
+    })),
+    book: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      className: className
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M4 19.5A2.5 2.5 0 016.5 17H20"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"
+    })),
+    chart: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      className: className
+    }, /*#__PURE__*/React.createElement("line", {
+      x1: "18",
+      y1: "20",
+      x2: "18",
+      y2: "10"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "12",
+      y1: "20",
+      x2: "12",
+      y2: "4"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "6",
+      y1: "20",
+      x2: "6",
+      y2: "14"
+    })),
+    download: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      className: className
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"
+    }), /*#__PURE__*/React.createElement("polyline", {
+      points: "7 10 12 15 17 10"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "12",
+      y1: "15",
+      x2: "12",
+      y2: "3"
+    })),
+    star: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "currentColor",
+      className: className
+    }, /*#__PURE__*/React.createElement("polygon", {
+      points: "12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+    })),
+    clock: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      className: className
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: "12",
+      cy: "12",
+      r: "10"
+    }), /*#__PURE__*/React.createElement("polyline", {
+      points: "12 6 12 12 16 14"
+    })),
+    home: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      className: className
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+    }), /*#__PURE__*/React.createElement("polyline", {
+      points: "9 22 9 12 15 12 15 22"
+    })),
+    close: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      className: className
+    }, /*#__PURE__*/React.createElement("line", {
+      x1: "18",
+      y1: "6",
+      x2: "6",
+      y2: "18"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "6",
+      y1: "6",
+      x2: "18",
+      y2: "18"
+    })),
+    menu: /*#__PURE__*/React.createElement("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      className: className
+    }, /*#__PURE__*/React.createElement("line", {
+      x1: "3",
+      y1: "12",
+      x2: "21",
+      y2: "12"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "3",
+      y1: "6",
+      x2: "21",
+      y2: "6"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "3",
+      y1: "18",
+      x2: "21",
+      y2: "18"
+    })),
+    fire: /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: size
+      }
+    }, "\uD83D\uDD25"),
+    trophy: /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: size
+      }
+    }, "\uD83C\uDFC6"),
+    pdf: /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: size
+      }
+    }, "\uD83D\uDCC4")
+  };
+  return icons[name] || null;
+};
+
+// ─── PROGRESS BAR ─────────────────────────────────────────────────────────────
+const ProgressBar = ({
+  value,
+  color = '#1a237e',
+  height = 8,
+  label = true
+}) => /*#__PURE__*/React.createElement("div", null, label && /*#__PURE__*/React.createElement("div", {
+  className: "flex justify-between text-xs mb-1",
+  style: {
+    color: '#666'
+  }
+}, /*#__PURE__*/React.createElement("span", null, "Progress"), /*#__PURE__*/React.createElement("span", {
+  style: {
+    color
+  }
+}, value, "%")), /*#__PURE__*/React.createElement("div", {
+  className: "progress-bar",
+  style: {
+    height
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  className: "progress-fill",
+  style: {
+    width: `${value}%`,
+    height,
+    background: `linear-gradient(90deg,${color},${color}99)`
+  }
+})));
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
+const Sidebar = ({
+  page,
+  setPage,
+  track,
+  sidebarOpen,
+  setSidebarOpen
+}) => {
+  const nav = [{
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: 'home'
+  }, {
+    id: 'track',
+    label: track ? TRACKS[track].label : 'Track',
+    icon: 'book'
+  }, {
+    id: 'module',
+    label: 'Modules',
+    icon: 'book'
+  }, {
+    id: 'quiz',
+    label: 'Practice Quiz',
+    icon: 'chart'
+  }, {
+    id: 'exam',
+    label: 'Exam Papers',
+    icon: 'clock'
+  }, {
+    id: 'progress',
+    label: 'My Progress',
+    icon: 'star'
+  }];
+  return /*#__PURE__*/React.createElement(React.Fragment, null, sidebarOpen && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 bg-black/50 z-20 lg:hidden",
+    onClick: () => setSidebarOpen(false)
+  }), /*#__PURE__*/React.createElement("aside", {
+    className: `sidebar fixed top-0 left-0 h-full w-64 z-30 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-5 border-b border-white/10 flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'linear-gradient(135deg,#ff6f00,#ff9800)',
+      borderRadius: 10,
+      width: 36,
+      height: 36,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "yatra text-white font-bold",
+    style: {
+      fontSize: 16
+    }
+  }, "\u0905")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "yatra text-white font-bold",
+    style: {
+      fontSize: 18,
+      lineHeight: 1
+    }
+  }, "Aakar"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'rgba(255,255,255,.5)',
+      fontSize: 11,
+      letterSpacing: 1
+    }
+  }, "HINDI LEARNING")), /*#__PURE__*/React.createElement("button", {
+    className: "ml-auto text-white/40 lg:hidden",
+    onClick: () => setSidebarOpen(false)
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "close",
+    size: 18
+  }))), track && /*#__PURE__*/React.createElement("div", {
+    className: "mx-4 mt-4 rounded-lg p-3",
+    style: {
+      background: 'rgba(255,111,0,.12)',
+      border: '1px solid rgba(255,111,0,.2)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#ff9800',
+      fontSize: 11,
+      fontWeight: 600,
+      letterSpacing: .5
+    }
+  }, "CURRENT TRACK"), /*#__PURE__*/React.createElement("div", {
+    className: "text-white font-semibold mt-0.5"
+  }, TRACKS[track].label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'rgba(255,255,255,.5)',
+      fontSize: 12
+    }
+  }, TRACKS[track].grades)), /*#__PURE__*/React.createElement("nav", {
+    className: "flex-1 p-3 mt-2"
+  }, nav.map(item => /*#__PURE__*/React.createElement("button", {
+    key: item.id,
+    onClick: () => {
+      setPage(item.id);
+      setSidebarOpen(false);
+    },
+    className: `sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 text-left ${page === item.id ? 'active' : ''}`,
+    style: {
+      color: page === item.id ? '#ff9800' : 'rgba(255,255,255,.65)',
+      fontSize: 14,
+      fontWeight: page === item.id ? 600 : 400
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: item.icon,
+    size: 17
+  }), item.label))), /*#__PURE__*/React.createElement("div", {
+    className: "p-4 border-t border-white/10 flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 34,
+      height: 34,
+      borderRadius: '50%',
+      background: 'linear-gradient(135deg,#ff6f00,#1a237e)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+      fontWeight: 700,
+      fontSize: 14
+    }
+  }, "A"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'white',
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, "Aryan Sharma"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'rgba(255,255,255,.4)',
+      fontSize: 11
+    }
+  }, "PSLE \xB7 P5")), /*#__PURE__*/React.createElement("div", {
+    className: "ml-auto flex items-center gap-1",
+    style: {
+      color: '#ff9800',
+      fontSize: 12,
+      fontWeight: 700
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "fire",
+    size: 14
+  }), "12"))));
+};
+
+// ─── TOP BAR ──────────────────────────────────────────────────────────────────
+const TopBar = ({
+  title,
+  sidebarOpen,
+  setSidebarOpen
+}) => /*#__PURE__*/React.createElement("header", {
+  className: "bg-white border-b sticky top-0 z-10 flex items-center gap-4 px-4 lg:px-6 h-14",
+  style: {
+    borderColor: '#e8eaf6'
+  }
+}, /*#__PURE__*/React.createElement("button", {
+  className: "lg:hidden text-navy",
+  onClick: () => setSidebarOpen(!sidebarOpen)
+}, /*#__PURE__*/React.createElement(Icon, {
+  name: "menu",
+  size: 22
+})), /*#__PURE__*/React.createElement("h1", {
+  className: "font-semibold",
+  style: {
+    color: '#1a1a2e',
+    fontSize: 16
+  }
+}, title), /*#__PURE__*/React.createElement("div", {
+  className: "ml-auto flex items-center gap-3"
+}, /*#__PURE__*/React.createElement("div", {
+  className: "flex items-center gap-1.5 px-3 py-1.5 rounded-full",
+  style: {
+    background: '#fff8e1',
+    border: '1px solid #ffd54f'
+  }
+}, /*#__PURE__*/React.createElement("span", {
+  style: {
+    fontSize: 14
+  }
+}, "\uD83D\uDD25"), /*#__PURE__*/React.createElement("span", {
+  style: {
+    fontSize: 13,
+    fontWeight: 700,
+    color: '#e65100'
+  }
+}, "12 day streak"))));
+
+// ─── LANDING PAGE ─────────────────────────────────────────────────────────────
+const LandingPage = ({
+  onStart
+}) => {
+  const features = [{
+    icon: '📚',
+    title: 'Dual Track System',
+    desc: 'PSLE (P3–P6) and O-Level (Sec 1–4) — each with equal depth, 50 exam papers per level'
+  }, {
+    icon: '🧠',
+    title: 'Smart Progression',
+    desc: 'Foundational → Advanced → Expert. Each level unlocks only after meeting minimum score criteria'
+  }, {
+    icon: '✍️',
+    title: 'Full Exam Simulation',
+    desc: 'Timer-based papers matching MOE format. Grammar, Vocabulary, Comprehension, Writing all covered'
+  }, {
+    icon: '💡',
+    title: 'Answer Explanations',
+    desc: 'Every question explained in Hindi + English. Wrong options analyzed. Concept anchored'
+  }, {
+    icon: '📊',
+    title: 'Progress Analytics',
+    desc: 'Track scores, attempts, streaks. See exactly where you\'re strong and where to improve'
+  }, {
+    icon: '📥',
+    title: 'Worksheets & PDFs',
+    desc: 'Downloadable practice papers, vocabulary lists, composition guides and more'
+  }];
+  const testimonials = [{
+    name: 'Priya Mehta',
+    role: 'P6 Student',
+    grade: 'PSLE A*',
+    text: 'My Hindi went from B to A* in 3 months. The explanation engine is incredible — I finally understand WHY, not just WHAT.'
+  }, {
+    name: 'Rajesh Kumar',
+    role: 'Parent',
+    grade: 'Sec 3 Son',
+    text: 'Worth every dollar. My son\'s O-Level Hindi improved dramatically. The cloze passage bank alone is unmatched.'
+  }, {
+    name: 'Ms. Anita Singh',
+    role: 'Hindi Teacher',
+    grade: 'MOE School',
+    text: 'I recommend Aakar to all my students. The content quality rivals any tuition centre, accessible anytime.'
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      background: '#f5f6fa'
+    }
+  }, /*#__PURE__*/React.createElement("nav", {
+    className: "bg-white border-b px-6 h-16 flex items-center gap-6 sticky top-0 z-20",
+    style: {
+      borderColor: '#e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2.5"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'linear-gradient(135deg,#ff6f00,#ff9800)',
+      borderRadius: 8,
+      width: 32,
+      height: 32,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "yatra text-white font-bold",
+    style: {
+      fontSize: 15
+    }
+  }, "\u0905")), /*#__PURE__*/React.createElement("span", {
+    className: "yatra font-bold",
+    style: {
+      fontSize: 20,
+      color: '#0d1b4b'
+    }
+  }, "Aakar Hindi")), /*#__PURE__*/React.createElement("div", {
+    className: "hidden md:flex items-center gap-6 ml-8",
+    style: {
+      color: '#555',
+      fontSize: 14
+    }
+  }, ['Features', 'Curriculum', 'Pricing', 'About'].map(l => /*#__PURE__*/React.createElement("a", {
+    key: l,
+    href: "#",
+    style: {
+      color: '#555',
+      textDecoration: 'none',
+      fontWeight: 500
+    }
+  }, l))), /*#__PURE__*/React.createElement("div", {
+    className: "ml-auto flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "px-4 py-2 rounded-lg font-medium",
+    style: {
+      color: '#1a237e',
+      fontSize: 14
+    }
+  }, "Log in"), /*#__PURE__*/React.createElement("button", {
+    onClick: onStart,
+    className: "px-5 py-2 rounded-lg font-semibold text-white",
+    style: {
+      background: 'linear-gradient(135deg,#1a237e,#283593)',
+      fontSize: 14
+    }
+  }, "Start Free Trial"))), /*#__PURE__*/React.createElement("section", {
+    className: "hero-bg py-20 px-6 text-center relative"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "deva-watermark"
+  }, "\u0939\u093F\u0902\u0926\u0940"), /*#__PURE__*/React.createElement("div", {
+    className: "relative z-10 max-w-4xl mx-auto"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "badge fade-up mb-4 mx-auto",
+    style: {
+      background: 'rgba(255,152,0,.15)',
+      color: '#ff9800',
+      border: '1px solid rgba(255,152,0,.3)'
+    }
+  }, "\uD83C\uDDF8\uD83C\uDDEC \xA0Singapore's #1 Hindi Learning Platform"), /*#__PURE__*/React.createElement("h1", {
+    className: "display fade-up-1 text-white mb-4",
+    style: {
+      fontSize: 'clamp(2rem,5vw,3.5rem)',
+      lineHeight: 1.15,
+      fontWeight: 400
+    }
+  }, "Master Hindi.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: '#ff9800'
+    }
+  }, "Excel in Exams.")), /*#__PURE__*/React.createElement("p", {
+    className: "fade-up-2 mx-auto mb-3",
+    style: {
+      color: 'rgba(255,255,255,.75)',
+      fontSize: 'clamp(14px,2vw,18px)',
+      maxWidth: 560,
+      lineHeight: 1.7
+    }
+  }, "Structured PSLE & O-Level Hindi prep \u2014 150 papers, 1000+ vocabulary, 500 cloze passages, with AI-powered answer explanations in Hindi and English."), /*#__PURE__*/React.createElement("p", {
+    className: "hindi fade-up-2 mb-8",
+    style: {
+      color: 'rgba(255,152,0,.9)',
+      fontSize: 18
+    }
+  }, "\"\u091C\u094D\u091E\u093E\u0928 \u0939\u0940 \u0936\u0915\u094D\u0924\u093F \u0939\u0948\u0964\" \u2014 Knowledge is Power."), /*#__PURE__*/React.createElement("div", {
+    className: "fade-up-3 flex flex-wrap justify-center gap-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onStart,
+    className: "px-8 py-3.5 rounded-xl font-bold text-white",
+    style: {
+      background: 'linear-gradient(135deg,#ff6f00,#ff9800)',
+      fontSize: 16,
+      boxShadow: '0 8px 24px rgba(255,111,0,.4)'
+    }
+  }, "Start Learning Free \u2192"), /*#__PURE__*/React.createElement("button", {
+    className: "px-8 py-3.5 rounded-xl font-semibold",
+    style: {
+      background: 'rgba(255,255,255,.1)',
+      color: 'white',
+      border: '1px solid rgba(255,255,255,.2)',
+      fontSize: 16,
+      backdropFilter: 'blur(8px)'
+    }
+  }, "View Demo")), /*#__PURE__*/React.createElement("div", {
+    className: "fade-up-4 grid grid-cols-2 md:grid-cols-4 gap-4 mt-14 max-w-3xl mx-auto"
+  }, [['150+', 'Exam Papers'], ['1,500+', 'Questions'], ['500+', 'Cloze Passages'], ['1,000+', 'Vocabulary Items']].map(([n, l]) => /*#__PURE__*/React.createElement("div", {
+    key: l,
+    style: {
+      background: 'rgba(255,255,255,.08)',
+      borderRadius: 12,
+      padding: '16px 12px',
+      border: '1px solid rgba(255,255,255,.12)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "display text-white",
+    style: {
+      fontSize: 28
+    }
+  }, n), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'rgba(255,255,255,.55)',
+      fontSize: 12,
+      marginTop: 2
+    }
+  }, l)))))), /*#__PURE__*/React.createElement("section", {
+    className: "py-16 px-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-w-5xl mx-auto"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "display text-center mb-2",
+    style: {
+      fontSize: 32,
+      color: '#0d1b4b'
+    }
+  }, "Two Complete Tracks"), /*#__PURE__*/React.createElement("p", {
+    className: "text-center mb-10",
+    style: {
+      color: '#666'
+    }
+  }, "Equal depth, equal quality \u2014 tailored to each exam format"), /*#__PURE__*/React.createElement("div", {
+    className: "grid md:grid-cols-2 gap-6"
+  }, Object.values(TRACKS).map(t => /*#__PURE__*/React.createElement("div", {
+    key: t.id,
+    className: "card-hover rounded-2xl overflow-hidden",
+    style: {
+      background: 'white',
+      border: '1px solid #e8eaf6',
+      boxShadow: '0 4px 24px rgba(0,0,0,.06)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-6",
+    style: {
+      background: `linear-gradient(135deg,${t.color},${t.color}dd)`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 36,
+      marginBottom: 8
+    }
+  }, t.icon), /*#__PURE__*/React.createElement("h3", {
+    className: "display text-white",
+    style: {
+      fontSize: 24,
+      marginBottom: 4
+    }
+  }, t.label), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: 'rgba(255,255,255,.75)',
+      fontSize: 14
+    }
+  }, t.grades, " \xB7 ", t.examBoard)), /*#__PURE__*/React.createElement("div", {
+    className: "p-6"
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: '#555',
+      fontSize: 14,
+      lineHeight: 1.6,
+      marginBottom: 16
+    }
+  }, t.description), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-3"
+  }, [['3 Levels', 'F / A / E'], ['50 Papers', 'Per Level'], ['100+ Q', 'Per Level'], ['4 Modules', 'Grammar+']].map(([v, l]) => /*#__PURE__*/React.createElement("div", {
+    key: l,
+    style: {
+      background: '#f5f6fa',
+      borderRadius: 10,
+      padding: '10px 12px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      color: '#1a237e',
+      fontSize: 16
+    }
+  }, v), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#888',
+      fontSize: 11
+    }
+  }, l)))), /*#__PURE__*/React.createElement("button", {
+    onClick: onStart,
+    className: "mt-4 w-full py-2.5 rounded-xl font-semibold text-white",
+    style: {
+      background: `linear-gradient(135deg,${t.color},${t.accent})`,
+      fontSize: 14
+    }
+  }, "Explore ", t.label, " \u2192"))))))), /*#__PURE__*/React.createElement("section", {
+    className: "py-16 px-6",
+    style: {
+      background: 'white'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-w-5xl mx-auto"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "display text-center mb-2",
+    style: {
+      fontSize: 32,
+      color: '#0d1b4b'
+    }
+  }, "Everything You Need to Score"), /*#__PURE__*/React.createElement("p", {
+    className: "text-center mb-10",
+    style: {
+      color: '#666'
+    }
+  }, "No tuition centre needed. Everything from explanation to exam \u2014 in one platform."), /*#__PURE__*/React.createElement("div", {
+    className: "grid md:grid-cols-3 gap-6"
+  }, features.map(f => /*#__PURE__*/React.createElement("div", {
+    key: f.title,
+    className: "p-5 rounded-xl",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 28,
+      marginBottom: 12
+    }
+  }, f.icon), /*#__PURE__*/React.createElement("h4", {
+    style: {
+      fontWeight: 700,
+      color: '#0d1b4b',
+      marginBottom: 6
+    }
+  }, f.title), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: '#666',
+      fontSize: 14,
+      lineHeight: 1.6
+    }
+  }, f.desc)))))), /*#__PURE__*/React.createElement("section", {
+    className: "py-16 px-6",
+    style: {
+      background: '#f5f6fa'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-w-5xl mx-auto"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "display text-center mb-10",
+    style: {
+      fontSize: 32,
+      color: '#0d1b4b'
+    }
+  }, "What Parents & Students Say"), /*#__PURE__*/React.createElement("div", {
+    className: "grid md:grid-cols-3 gap-6"
+  }, testimonials.map(t => /*#__PURE__*/React.createElement("div", {
+    key: t.name,
+    className: "bg-white p-6 rounded-2xl",
+    style: {
+      border: '1px solid #e8eaf6',
+      boxShadow: '0 4px 20px rgba(0,0,0,.05)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex mb-3"
+  }, [1, 2, 3, 4, 5].map(i => /*#__PURE__*/React.createElement(Icon, {
+    key: i,
+    name: "star",
+    size: 14,
+    className: "",
+    style: {
+      color: '#ff9800'
+    }
+  }))), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: '#444',
+      fontSize: 14,
+      lineHeight: 1.7,
+      marginBottom: 16
+    }
+  }, "\"", t.text, "\""), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 36,
+      height: 36,
+      borderRadius: '50%',
+      background: 'linear-gradient(135deg,#1a237e,#ff6f00)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+      fontWeight: 700,
+      fontSize: 14
+    }
+  }, t.name[0]), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      color: '#0d1b4b',
+      fontSize: 13
+    }
+  }, t.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#888',
+      fontSize: 11
+    }
+  }, t.role, " \xB7 ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: '#2e7d32',
+      fontWeight: 600
+    }
+  }, t.grade))))))))), /*#__PURE__*/React.createElement("section", {
+    className: "py-16 px-6",
+    style: {
+      background: 'white'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-w-4xl mx-auto text-center"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "display mb-2",
+    style: {
+      fontSize: 32,
+      color: '#0d1b4b'
+    }
+  }, "Simple Pricing"), /*#__PURE__*/React.createElement("p", {
+    className: "mb-10",
+    style: {
+      color: '#666'
+    }
+  }, "Less than one tuition session per month. Cancel anytime."), /*#__PURE__*/React.createElement("div", {
+    className: "grid md:grid-cols-3 gap-6"
+  }, [{
+    name: 'Free',
+    price: '$0',
+    period: 'forever',
+    features: ['1 Level Access', '10 Practice Q/day', 'No papers', 'No worksheets'],
+    cta: 'Start Free',
+    highlight: false
+  }, {
+    name: 'Student',
+    price: '$19',
+    period: '/month',
+    features: ['All 3 Levels', 'Unlimited Practice', 'All 50 Papers/Level', 'PDF Worksheets', 'Progress Analytics'],
+    cta: 'Start Trial',
+    highlight: true
+  }, {
+    name: 'Family',
+    price: '$29',
+    period: '/month',
+    features: ['Both PSLE + O-Level', 'Up to 3 Students', 'All Features', 'Priority Support', 'Offline Downloads'],
+    cta: 'Get Family Plan',
+    highlight: false
+  }].map(p => /*#__PURE__*/React.createElement("div", {
+    key: p.name,
+    className: `p-6 rounded-2xl ${p.highlight ? 'text-white' : ''}`,
+    style: {
+      background: p.highlight ? 'linear-gradient(135deg,#1a237e,#283593)' : 'white',
+      border: p.highlight ? 'none' : '1px solid #e8eaf6',
+      boxShadow: p.highlight ? '0 12px 40px rgba(26,35,126,.25)' : '0 4px 20px rgba(0,0,0,.05)',
+      transform: p.highlight ? 'scale(1.03)' : 'none'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 14,
+      color: p.highlight ? 'rgba(255,255,255,.7)' : '#888',
+      marginBottom: 8
+    }
+  }, p.name), /*#__PURE__*/React.createElement("div", {
+    className: "display",
+    style: {
+      fontSize: 40,
+      color: p.highlight ? 'white' : '#0d1b4b'
+    }
+  }, p.price), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: p.highlight ? 'rgba(255,255,255,.5)' : '#aaa',
+      fontSize: 12,
+      marginBottom: 20
+    }
+  }, p.period), p.features.map(f => /*#__PURE__*/React.createElement("div", {
+    key: f,
+    className: "flex items-center gap-2 mb-2.5",
+    style: {
+      fontSize: 13,
+      color: p.highlight ? 'rgba(255,255,255,.85)' : '#555'
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "check",
+    size: 14
+  }), " ", f)), /*#__PURE__*/React.createElement("button", {
+    onClick: onStart,
+    className: "mt-4 w-full py-2.5 rounded-xl font-semibold",
+    style: {
+      background: p.highlight ? 'linear-gradient(135deg,#ff6f00,#ff9800)' : '#e8eaf6',
+      color: p.highlight ? 'white' : '#1a237e',
+      fontSize: 14
+    }
+  }, p.cta)))))), /*#__PURE__*/React.createElement("footer", {
+    className: "py-10 px-6 text-center",
+    style: {
+      background: '#0d1b4b',
+      color: 'rgba(255,255,255,.5)',
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "yatra mb-2",
+    style: {
+      color: 'rgba(255,152,0,.8)',
+      fontSize: 20
+    }
+  }, "Aakar Hindi"), /*#__PURE__*/React.createElement("p", null, "\xA9 2026 Aakar Learning Pte Ltd \xB7 Singapore \xB7 ", /*#__PURE__*/React.createElement("a", {
+    href: "#",
+    style: {
+      color: 'rgba(255,255,255,.4)'
+    }
+  }, "Privacy"), " \xB7 ", /*#__PURE__*/React.createElement("a", {
+    href: "#",
+    style: {
+      color: 'rgba(255,255,255,.4)'
+    }
+  }, "Terms")), /*#__PURE__*/React.createElement("p", {
+    className: "hindi mt-2",
+    style: {
+      fontSize: 14,
+      color: 'rgba(255,255,255,.3)'
+    }
+  }, "\u0939\u093F\u0902\u0926\u0940 \u0938\u0940\u0916\u094B, \u0906\u0917\u0947 \u092C\u0922\u093C\u094B\u0964")));
+};
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+const Dashboard = ({
+  setPage,
+  setTrack,
+  track
+}) => /*#__PURE__*/React.createElement("div", {
+  className: "p-4 lg:p-6 max-w-5xl mx-auto"
+}, /*#__PURE__*/React.createElement("div", {
+  className: "fade-up rounded-2xl p-6 mb-6 relative overflow-hidden",
+  style: {
+    background: 'linear-gradient(135deg,#1a237e,#283593)',
+    color: 'white'
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  className: "deva-watermark",
+  style: {
+    fontSize: 120,
+    top: '50%',
+    right: -10
+  }
+}, "\u0905"), /*#__PURE__*/React.createElement("div", {
+  className: "relative z-10"
+}, /*#__PURE__*/React.createElement("p", {
+  style: {
+    color: 'rgba(255,255,255,.6)',
+    fontSize: 14,
+    marginBottom: 4
+  }
+}, "Good morning \uD83C\uDF24\uFE0F"), /*#__PURE__*/React.createElement("h2", {
+  className: "display",
+  style: {
+    fontSize: 28,
+    marginBottom: 4
+  }
+}, "Welcome back, Aryan!"), /*#__PURE__*/React.createElement("p", {
+  style: {
+    color: 'rgba(255,255,255,.7)',
+    fontSize: 14
+  }
+}, "You're on a ", /*#__PURE__*/React.createElement("span", {
+  style: {
+    color: '#ff9800',
+    fontWeight: 700
+  }
+}, "12-day streak \uD83D\uDD25"), " \u2014 keep it up!"), /*#__PURE__*/React.createElement("div", {
+  className: "flex flex-wrap gap-3 mt-4"
+}, /*#__PURE__*/React.createElement("button", {
+  onClick: () => setPage('quiz'),
+  className: "px-5 py-2.5 rounded-xl font-semibold text-white",
+  style: {
+    background: 'rgba(255,111,0,.9)',
+    fontSize: 14
+  }
+}, "Continue Practice \u2192"), /*#__PURE__*/React.createElement("button", {
+  onClick: () => setPage('exam'),
+  className: "px-5 py-2.5 rounded-xl font-semibold",
+  style: {
+    background: 'rgba(255,255,255,.1)',
+    color: 'white',
+    border: '1px solid rgba(255,255,255,.2)',
+    fontSize: 14
+  }
+}, "Take Exam Paper")))), /*#__PURE__*/React.createElement("div", {
+  className: "fade-up-1 grid md:grid-cols-2 gap-4 mb-6"
+}, Object.values(TRACKS).map(t => /*#__PURE__*/React.createElement("div", {
+  key: t.id,
+  onClick: () => {
+    setTrack(t.id);
+    setPage('track');
+  },
+  className: "card-hover bg-white rounded-xl p-5 cursor-pointer",
+  style: {
+    border: `2px solid ${track === t.id ? '#1a237e' : '#e8eaf6'}`
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  className: "flex items-center gap-3 mb-3"
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    background: `linear-gradient(135deg,${t.color},${t.accent})`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 20
+  }
+}, t.icon), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontWeight: 700,
+    color: '#0d1b4b'
+  }
+}, t.label), /*#__PURE__*/React.createElement("div", {
+  style: {
+    color: '#888',
+    fontSize: 12
+  }
+}, t.grades)), track === t.id && /*#__PURE__*/React.createElement("div", {
+  className: "ml-auto badge",
+  style: {
+    background: '#e8eaf6',
+    color: '#1a237e'
+  }
+}, "Active")), /*#__PURE__*/React.createElement(ProgressBar, {
+  value: track === t.id ? 68 : 0,
+  color: t.color,
+  label: false
+}), /*#__PURE__*/React.createElement("div", {
+  className: "flex justify-between mt-2",
+  style: {
+    color: '#888',
+    fontSize: 12
+  }
+}, /*#__PURE__*/React.createElement("span", null, track === t.id ? '68% complete' : 'Not started'), /*#__PURE__*/React.createElement("span", null, "Foundational Level"))))), /*#__PURE__*/React.createElement("div", {
+  className: "fade-up-2 grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
+}, [{
+  label: 'Questions Done',
+  value: '247',
+  icon: '📝',
+  color: '#1a237e'
+}, {
+  label: 'Avg Score',
+  value: '82%',
+  icon: '📊',
+  color: '#2e7d32'
+}, {
+  label: 'Papers Taken',
+  value: '8',
+  icon: '📋',
+  color: '#e65100'
+}, {
+  label: 'Day Streak',
+  value: '12',
+  icon: '🔥',
+  color: '#c62828'
+}].map(s => /*#__PURE__*/React.createElement("div", {
+  key: s.label,
+  className: "bg-white rounded-xl p-4",
+  style: {
+    border: '1px solid #e8eaf6'
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontSize: 22,
+    marginBottom: 6
+  }
+}, s.icon), /*#__PURE__*/React.createElement("div", {
+  className: "display",
+  style: {
+    fontSize: 28,
+    color: s.color,
+    lineHeight: 1
+  }
+}, s.value), /*#__PURE__*/React.createElement("div", {
+  style: {
+    color: '#888',
+    fontSize: 11,
+    marginTop: 4
+  }
+}, s.label)))), /*#__PURE__*/React.createElement("div", {
+  className: "fade-up-3 grid md:grid-cols-2 gap-6"
+}, /*#__PURE__*/React.createElement("div", {
+  className: "bg-white rounded-xl p-5",
+  style: {
+    border: '1px solid #e8eaf6'
+  }
+}, /*#__PURE__*/React.createElement("h3", {
+  style: {
+    fontWeight: 700,
+    color: '#0d1b4b',
+    marginBottom: 14,
+    fontSize: 15
+  }
+}, "Recent Activity"), RECENT_ACTIVITY.map((a, i) => /*#__PURE__*/React.createElement("div", {
+  key: i,
+  className: "flex items-center gap-3 py-2.5 border-b last:border-0",
+  style: {
+    borderColor: '#f0f0f0'
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    width: 36,
+    height: 36,
+    borderRadius: 9,
+    background: '#f5f6fa',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 16
+  }
+}, a.icon), /*#__PURE__*/React.createElement("div", {
+  className: "flex-1"
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontWeight: 600,
+    color: '#0d1b4b',
+    fontSize: 13
+  }
+}, a.label), /*#__PURE__*/React.createElement("div", {
+  style: {
+    color: '#aaa',
+    fontSize: 11
+  }
+}, a.time)), /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontWeight: 700,
+    color: a.score >= 80 ? '#2e7d32' : '#e65100',
+    fontSize: 14
+  }
+}, a.score, "%")))), /*#__PURE__*/React.createElement("div", {
+  className: "bg-white rounded-xl p-5",
+  style: {
+    border: '1px solid #e8eaf6'
+  }
+}, /*#__PURE__*/React.createElement("h3", {
+  style: {
+    fontWeight: 700,
+    color: '#0d1b4b',
+    marginBottom: 14,
+    fontSize: 15
+  }
+}, "Modules Overview"), MODULES.map(m => /*#__PURE__*/React.createElement("div", {
+  key: m.id,
+  className: "flex items-center gap-3 mb-3 cursor-pointer",
+  onClick: () => setPage('module')
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    width: 36,
+    height: 36,
+    borderRadius: 9,
+    background: m.bg,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 16
+  }
+}, m.icon), /*#__PURE__*/React.createElement("div", {
+  className: "flex-1"
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontWeight: 600,
+    color: '#0d1b4b',
+    fontSize: 13
+  }
+}, m.label), /*#__PURE__*/React.createElement("div", {
+  className: "progress-bar mt-1",
+  style: {
+    height: 4
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  className: "progress-fill",
+  style: {
+    width: `${m.topics.filter(t => t.done).length / m.topics.length * 100}%`,
+    height: 4,
+    background: m.color
+  }
+}))), /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontSize: 12,
+    color: '#888'
+  }
+}, m.topics.filter(t => t.done).length, "/", m.topics.length))))));
+
+// ─── TRACK PAGE ───────────────────────────────────────────────────────────────
+const TrackPage = ({
+  track,
+  setPage,
+  setModule
+}) => {
+  const t = TRACKS[track || 'psle'];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "p-4 lg:p-6 max-w-4xl mx-auto"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fade-up rounded-2xl p-6 mb-6",
+    style: {
+      background: `linear-gradient(135deg,${t.color},${t.color}cc)`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 36,
+      marginBottom: 8
+    }
+  }, t.icon), /*#__PURE__*/React.createElement("h2", {
+    className: "display text-white",
+    style: {
+      fontSize: 28
+    }
+  }, t.label), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: 'rgba(255,255,255,.7)',
+      fontSize: 14,
+      marginTop: 4
+    }
+  }, t.grades, " \xB7 ", t.examBoard, " \xB7 3 Levels \xB7 150 Exam Papers")), /*#__PURE__*/React.createElement("div", {
+    className: "fade-up-1 mb-4",
+    style: {
+      fontWeight: 600,
+      color: '#0d1b4b',
+      fontSize: 14
+    }
+  }, "Your Levels"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-4 fade-up-2"
+  }, LEVELS.map((lv, i) => /*#__PURE__*/React.createElement("div", {
+    key: lv.id,
+    onClick: () => {
+      if (!lv.locked) {
+        setPage('module');
+      }
+    },
+    className: `level-card bg-white rounded-2xl overflow-hidden ${lv.locked ? 'level-locked' : ''}`,
+    style: {
+      border: `1px solid ${lv.locked ? '#e8eaf6' : lv.color + '44'}`,
+      boxShadow: lv.locked ? 'none' : '0 4px 20px rgba(0,0,0,.06)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-5 flex items-center gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 56,
+      height: 56,
+      borderRadius: 14,
+      background: lv.locked ? '#e8eaf6' : `linear-gradient(135deg,${lv.color},${lv.color}99)`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0
+    }
+  }, lv.locked ? /*#__PURE__*/React.createElement(Icon, {
+    name: "lock",
+    size: 22,
+    className: "",
+    style: {
+      color: '#aaa'
+    }
+  }) : /*#__PURE__*/React.createElement("span", {
+    className: "hindi text-white",
+    style: {
+      fontSize: 22
+    }
+  }, lv.hindi[0])), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 mb-0.5"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      color: '#0d1b4b',
+      fontSize: 16
+    }
+  }, lv.label), /*#__PURE__*/React.createElement("span", {
+    className: "hindi",
+    style: {
+      color: '#888',
+      fontSize: 13
+    }
+  }, "(", lv.hindi, ")"), !lv.locked && /*#__PURE__*/React.createElement("span", {
+    className: "badge",
+    style: {
+      background: '#e8f5e9',
+      color: '#2e7d32'
+    }
+  }, "Active"), lv.locked && i === 1 && /*#__PURE__*/React.createElement("span", {
+    className: "badge",
+    style: {
+      background: '#fff8e1',
+      color: '#e65100'
+    }
+  }, "Complete Level 1 to unlock")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#888',
+      fontSize: 12,
+      marginBottom: 8
+    }
+  }, lv.topics, " Topics \xB7 ", lv.papers, " Exam Papers \xB7 ", lv.questions, " Practice Q"), !lv.locked && /*#__PURE__*/React.createElement(ProgressBar, {
+    value: lv.progress,
+    color: lv.color,
+    label: true
+  })), !lv.locked && /*#__PURE__*/React.createElement(Icon, {
+    name: "arrow",
+    size: 20,
+    className: "",
+    style: {
+      color: lv.color,
+      flexShrink: 0
+    }
+  })), !lv.locked && /*#__PURE__*/React.createElement("div", {
+    className: "px-5 pb-4 grid grid-cols-4 gap-3"
+  }, MODULES.map(m => /*#__PURE__*/React.createElement("div", {
+    key: m.id,
+    style: {
+      background: m.bg,
+      borderRadius: 10,
+      padding: '8px 10px',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16
+    }
+  }, m.icon), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      fontWeight: 600,
+      color: m.color,
+      marginTop: 2
+    }
+  }, m.label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: '#888'
+    }
+  }, m.topics.filter(t => t.done).length, "/", m.topics.length))))))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-6 fade-up-3 bg-white rounded-2xl p-5",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontWeight: 700,
+      color: '#0d1b4b',
+      marginBottom: 14,
+      fontSize: 15
+    }
+  }, "Exam Papers \u2014 Foundational Level"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 md:grid-cols-5 gap-3"
+  }, Array.from({
+    length: 10
+  }, (_, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    onClick: () => setPage('exam'),
+    className: "card-hover rounded-xl p-3 text-center",
+    style: {
+      border: `1px solid ${i < 3 ? '#c8e6c9' : '#e8eaf6'}`,
+      background: i < 3 ? '#f1f8e9' : 'white'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20
+    }
+  }, "\uD83D\uDCCB"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600,
+      fontSize: 12,
+      color: i < 3 ? '#2e7d32' : '#0d1b4b',
+      marginTop: 4
+    }
+  }, "Paper ", i + 1), i < 3 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#2e7d32',
+      fontSize: 10,
+      fontWeight: 600
+    }
+  }, "\u2713 ", [79, 84, 91][i], "%"), i === 3 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#ff6f00',
+      fontSize: 10
+    }
+  }, "In Progress"), i > 3 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#aaa',
+      fontSize: 10
+    }
+  }, "Locked")))), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: '#aaa',
+      fontSize: 12,
+      marginTop: 10
+    }
+  }, "50 papers total per level \xB7 Unlock more as you progress")));
+};
+
+// ─── MODULE PAGE ──────────────────────────────────────────────────────────────
+const ModulePage = ({
+  setPage
+}) => /*#__PURE__*/React.createElement("div", {
+  className: "p-4 lg:p-6 max-w-4xl mx-auto"
+}, /*#__PURE__*/React.createElement("div", {
+  className: "fade-up grid md:grid-cols-2 gap-5"
+}, MODULES.map((m, mi) => /*#__PURE__*/React.createElement("div", {
+  key: m.id,
+  className: `fade-up-${mi} bg-white rounded-2xl overflow-hidden`,
+  style: {
+    border: `1px solid ${m.color}22`,
+    boxShadow: '0 4px 20px rgba(0,0,0,.05)'
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  className: "p-5 flex items-center gap-3",
+  style: {
+    background: m.bg,
+    borderBottom: `1px solid ${m.color}22`
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontSize: 28
+  }
+}, m.icon), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontWeight: 700,
+    color: m.color,
+    fontSize: 16
+  }
+}, m.label), /*#__PURE__*/React.createElement("div", {
+  className: "hindi",
+  style: {
+    color: '#888',
+    fontSize: 13
+  }
+}, m.hindi)), /*#__PURE__*/React.createElement("div", {
+  className: "ml-auto"
+}, /*#__PURE__*/React.createElement(ProgressBar, {
+  value: Math.round(m.topics.filter(t => t.done).length / m.topics.length * 100),
+  color: m.color,
+  label: false
+}), /*#__PURE__*/React.createElement("div", {
+  style: {
+    color: '#888',
+    fontSize: 11,
+    textAlign: 'right',
+    marginTop: 3
+  }
+}, m.topics.filter(t => t.done).length, "/", m.topics.length, " done"))), /*#__PURE__*/React.createElement("div", {
+  className: "p-4 space-y-2"
+}, m.topics.map((topic, ti) => /*#__PURE__*/React.createElement("button", {
+  key: ti,
+  onClick: () => setPage('lesson'),
+  className: "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left",
+  style: {
+    background: topic.done ? '#f8f9fa' : 'white',
+    border: `1px solid ${topic.done ? m.color + '22' : '#e8eaf6'}`
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    width: 28,
+    height: 28,
+    borderRadius: 7,
+    background: topic.done ? m.color : '#e8eaf6',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0
+  }
+}, topic.done ? /*#__PURE__*/React.createElement(Icon, {
+  name: "check",
+  size: 14,
+  className: "text-white"
+}) : /*#__PURE__*/React.createElement("span", {
+  style: {
+    color: '#aaa',
+    fontSize: 12,
+    fontWeight: 700
+  }
+}, ti + 1)), /*#__PURE__*/React.createElement("div", {
+  className: "flex-1"
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontWeight: 600,
+    fontSize: 13,
+    color: '#0d1b4b'
+  }
+}, topic.name), /*#__PURE__*/React.createElement("div", {
+  className: "hindi",
+  style: {
+    color: '#888',
+    fontSize: 11
+  }
+}, topic.hindi)), topic.done && /*#__PURE__*/React.createElement("span", {
+  style: {
+    fontWeight: 700,
+    color: topic.score >= 80 ? '#2e7d32' : '#e65100',
+    fontSize: 13
+  }
+}, topic.score, "%"), !topic.done && /*#__PURE__*/React.createElement(Icon, {
+  name: "arrow",
+  size: 14,
+  className: "",
+  style: {
+    color: '#ccc'
+  }
+})))), /*#__PURE__*/React.createElement("div", {
+  className: "px-4 pb-4 flex gap-2"
+}, /*#__PURE__*/React.createElement("button", {
+  onClick: () => setPage('quiz'),
+  className: "flex-1 py-2 rounded-xl font-semibold text-white text-center",
+  style: {
+    background: `linear-gradient(135deg,${m.color},${m.color}99)`,
+    fontSize: 13
+  }
+}, "Practice Questions"), /*#__PURE__*/React.createElement("button", {
+  className: "px-3 py-2 rounded-xl",
+  style: {
+    background: '#f5f6fa',
+    color: '#666',
+    border: '1px solid #e8eaf6',
+    fontSize: 13
+  }
+}, /*#__PURE__*/React.createElement(Icon, {
+  name: "download",
+  size: 15
+}), " PDF"))))));
+
+// ─── LESSON VIEWER ────────────────────────────────────────────────────────────
+const LessonViewer = ({
+  setPage
+}) => /*#__PURE__*/React.createElement("div", {
+  className: "p-4 lg:p-6 max-w-3xl mx-auto"
+}, /*#__PURE__*/React.createElement("div", {
+  className: "fade-up bg-white rounded-2xl p-6 mb-4",
+  style: {
+    border: '1px solid #e8eaf6'
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  className: "flex items-center gap-2 mb-1",
+  style: {
+    color: '#888',
+    fontSize: 12
+  }
+}, /*#__PURE__*/React.createElement("span", null, "Grammar"), /*#__PURE__*/React.createElement("span", null, "\u203A"), /*#__PURE__*/React.createElement("span", null, "Prepositions")), /*#__PURE__*/React.createElement("h2", {
+  className: "display",
+  style: {
+    fontSize: 26,
+    color: '#0d1b4b',
+    marginBottom: 6
+  }
+}, "Prepositions in Hindi"), /*#__PURE__*/React.createElement("p", {
+  className: "hindi",
+  style: {
+    fontSize: 20,
+    color: '#1a237e',
+    marginBottom: 4
+  }
+}, "\u0939\u093F\u0902\u0926\u0940 \u092E\u0947\u0902 \u092A\u0930\u0938\u0930\u094D\u0917 (\u0915\u093E\u0930\u0915)"), /*#__PURE__*/React.createElement("p", {
+  style: {
+    color: '#666',
+    fontSize: 13
+  }
+}, "Lesson 2 of 5 \xB7 ~15 min read")), /*#__PURE__*/React.createElement("div", {
+  className: "fade-up-1 bg-white rounded-2xl p-6 mb-4",
+  style: {
+    border: '1px solid #e8eaf6'
+  }
+}, /*#__PURE__*/React.createElement("h3", {
+  style: {
+    fontWeight: 700,
+    color: '#0d1b4b',
+    marginBottom: 12
+  }
+}, "What are Postpositions?"), /*#__PURE__*/React.createElement("p", {
+  style: {
+    color: '#444',
+    lineHeight: 1.8,
+    fontSize: 14,
+    marginBottom: 12
+  }
+}, "In Hindi, we use ", /*#__PURE__*/React.createElement("strong", null, "postpositions"), " (\u092A\u0930\u0938\u0930\u094D\u0917) instead of prepositions \u2014 they come ", /*#__PURE__*/React.createElement("em", null, "after"), " the noun, not before. The main postpositions are called ", /*#__PURE__*/React.createElement("strong", null, "Karak Chinh"), " (\u0915\u093E\u0930\u0915 \u091A\u093F\u0939\u094D\u0928)."), /*#__PURE__*/React.createElement("div", {
+  className: "rounded-xl p-4 mb-4",
+  style: {
+    background: '#e8eaf6',
+    border: '1px solid #c5cae9'
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  className: "hindi",
+  style: {
+    fontSize: 22,
+    color: '#1a237e',
+    marginBottom: 6
+  }
+}, "\u092E\u0947\u091C\u093C ", /*#__PURE__*/React.createElement("strong", null, "\u092A\u0930"), " \u0915\u093F\u0924\u093E\u092C \u0939\u0948\u0964"), /*#__PURE__*/React.createElement("div", {
+  style: {
+    color: '#444',
+    fontSize: 14
+  }
+}, "The book is ", /*#__PURE__*/React.createElement("strong", null, "on"), " the table. (", /*#__PURE__*/React.createElement("em", null, "par"), " = on/upon)")), /*#__PURE__*/React.createElement("h4", {
+  style: {
+    fontWeight: 700,
+    color: '#0d1b4b',
+    margin: '16px 0 10px'
+  }
+}, "The 8 Cases (\u0915\u093E\u0930\u0915)"), /*#__PURE__*/React.createElement("div", {
+  className: "overflow-x-auto"
+}, /*#__PURE__*/React.createElement("table", {
+  style: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: 13
+  }
+}, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+  style: {
+    background: '#f5f6fa'
+  }
+}, ['Case', 'Hindi Name', 'Postposition', 'Meaning'].map(h => /*#__PURE__*/React.createElement("th", {
+  key: h,
+  style: {
+    padding: '8px 12px',
+    textAlign: 'left',
+    color: '#555',
+    fontWeight: 600,
+    borderBottom: '2px solid #e8eaf6'
+  }
+}, h)))), /*#__PURE__*/React.createElement("tbody", null, [['Nominative', 'कर्ता कारक', 'ने', 'Subject marker'], ['Objective', 'कर्म कारक', 'को', 'To / For'], ['Instrumental', 'करण कारक', 'से', 'By / With / From'], ['Dative', 'सम्प्रदान कारक', 'के लिए', 'For the sake of'], ['Ablative', 'अपादान कारक', 'से', 'From (separation)'], ['Possessive', 'संबंध कारक', 'का/की/के', "Of / 's"], ['Locative', 'अधिकरण कारक', 'में/पर', 'In / On / At'], ['Vocative', 'संबोधन कारक', 'हे/ओ', 'O! / Hey!']].map((r, i) => /*#__PURE__*/React.createElement("tr", {
+  key: i,
+  style: {
+    borderBottom: '1px solid #f0f0f0',
+    background: i % 2 ? '#fafafa' : 'white'
+  }
+}, r.map((c, j) => /*#__PURE__*/React.createElement("td", {
+  key: j,
+  style: {
+    padding: '8px 12px',
+    color: j === 2 ? '#1a237e' : '#444',
+    fontWeight: j === 2 ? 700 : 400
+  },
+  className: j === 2 ? 'hindi' : ''
+}, c)))))))), /*#__PURE__*/React.createElement("div", {
+  className: "fade-up-2 bg-white rounded-2xl p-6 mb-4",
+  style: {
+    border: '1px solid #e8eaf6'
+  }
+}, /*#__PURE__*/React.createElement("h3", {
+  style: {
+    fontWeight: 700,
+    color: '#0d1b4b',
+    marginBottom: 12
+  }
+}, "Examples"), [{
+  hindi: 'राम <strong>ने</strong> सेब खाया।',
+  en: 'Ram <strong>ate</strong> an apple. (ne = nominative marker for past tense)',
+  note: 'ने is used with transitive verbs in past tense'
+}, {
+  hindi: 'माँ <strong>को</strong> दूध दो।',
+  en: 'Give milk <strong>to</strong> mother.',
+  note: 'को marks the indirect object (recipient)'
+}, {
+  hindi: 'वह दिल्ली <strong>से</strong> आया।',
+  en: 'He came <strong>from</strong> Delhi.',
+  note: 'से marks ablative — point of origin'
+}].map((e, i) => /*#__PURE__*/React.createElement("div", {
+  key: i,
+  className: "mb-4 rounded-xl p-4",
+  style: {
+    background: i % 2 ? '#fff8e1' : '#f3e5f5',
+    border: `1px solid ${i % 2 ? '#ffe082' : '#ce93d8'}`
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  className: "hindi",
+  style: {
+    fontSize: 20,
+    color: '#1a237e',
+    marginBottom: 4
+  },
+  dangerouslySetInnerHTML: {
+    __html: e.hindi
+  }
+}), /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontSize: 13,
+    color: '#444',
+    marginBottom: 4
+  },
+  dangerouslySetInnerHTML: {
+    __html: e.en
+  }
+}), /*#__PURE__*/React.createElement("div", {
+  style: {
+    fontSize: 12,
+    color: '#888',
+    fontStyle: 'italic'
+  }
+}, "\uD83D\uDCA1 ", e.note)))), /*#__PURE__*/React.createElement("div", {
+  className: "fade-up-3 flex gap-3"
+}, /*#__PURE__*/React.createElement("button", {
+  className: "px-5 py-2.5 rounded-xl font-semibold",
+  style: {
+    background: '#e8eaf6',
+    color: '#1a237e',
+    fontSize: 14
+  }
+}, "\u2190 Previous"), /*#__PURE__*/React.createElement("button", {
+  onClick: () => setPage('quiz'),
+  className: "flex-1 py-2.5 rounded-xl font-semibold text-white",
+  style: {
+    background: 'linear-gradient(135deg,#1a237e,#ff6f00)',
+    fontSize: 14
+  }
+}, "Practice This Topic \u2192"), /*#__PURE__*/React.createElement("button", {
+  className: "px-5 py-2.5 rounded-xl font-semibold",
+  style: {
+    background: '#e8eaf6',
+    color: '#1a237e',
+    fontSize: 14
+  }
+}, "Next \u2192")));
+
+// ─── QUIZ PAGE ────────────────────────────────────────────────────────────────
+const QuizPage = () => {
+  const [current, setCurrent] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [showExp, setShowExp] = useState(false);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+  const q = QUIZ_QUESTIONS[current];
+  const handleSelect = idx => {
+    if (selected !== null) return;
+    setSelected(idx);
+    setShowExp(true);
+    if (idx === q.correct) setScore(s => s + 1);
+  };
+  const next = () => {
+    if (current < QUIZ_QUESTIONS.length - 1) {
+      setCurrent(c => c + 1);
+      setSelected(null);
+      setShowExp(false);
+    } else {
+      setDone(true);
+    }
+  };
+  if (done) return /*#__PURE__*/React.createElement("div", {
+    className: "p-4 lg:p-6 max-w-2xl mx-auto flex flex-col items-center justify-center",
+    style: {
+      minHeight: '60vh'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fade-up bg-white rounded-2xl p-8 text-center",
+    style: {
+      border: '1px solid #e8eaf6',
+      width: '100%'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 60,
+      marginBottom: 12
+    }
+  }, "\uD83C\uDFC6"), /*#__PURE__*/React.createElement("h2", {
+    className: "display",
+    style: {
+      fontSize: 32,
+      color: '#0d1b4b',
+      marginBottom: 4
+    }
+  }, "Quiz Complete!"), /*#__PURE__*/React.createElement("div", {
+    className: "display",
+    style: {
+      fontSize: 64,
+      color: score / QUIZ_QUESTIONS.length >= .8 ? '#2e7d32' : '#e65100',
+      margin: '12px 0'
+    }
+  }, Math.round(score / QUIZ_QUESTIONS.length * 100), "%"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: '#666',
+      fontSize: 14,
+      marginBottom: 20
+    }
+  }, "You got ", score, " out of ", QUIZ_QUESTIONS.length, " correct"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-3 justify-center"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setCurrent(0);
+      setSelected(null);
+      setShowExp(false);
+      setScore(0);
+      setDone(false);
+    },
+    className: "px-6 py-2.5 rounded-xl font-semibold text-white",
+    style: {
+      background: 'linear-gradient(135deg,#1a237e,#283593)'
+    }
+  }, "Retry Quiz"), /*#__PURE__*/React.createElement("button", {
+    className: "px-6 py-2.5 rounded-xl font-semibold",
+    style: {
+      background: '#f5f6fa',
+      color: '#1a237e',
+      border: '1px solid #e8eaf6'
+    }
+  }, "Next Topic \u2192"))));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "p-4 lg:p-6 max-w-2xl mx-auto"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fade-up flex items-center gap-4 mb-5"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-between text-xs mb-1",
+    style: {
+      color: '#888'
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Question ", current + 1, " of ", QUIZ_QUESTIONS.length), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: '#2e7d32',
+      fontWeight: 600
+    }
+  }, "Score: ", score, "/", current)), /*#__PURE__*/React.createElement("div", {
+    className: "progress-bar",
+    style: {
+      height: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "progress-fill",
+    style: {
+      width: `${current / QUIZ_QUESTIONS.length * 100}%`,
+      height: 6
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      color: '#1a237e',
+      fontSize: 13,
+      whiteSpace: 'nowrap'
+    }
+  }, "Grammar Quiz")), /*#__PURE__*/React.createElement("div", {
+    className: "fade-up-1 bg-white rounded-2xl p-6 mb-4",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "badge mb-3",
+    style: {
+      background: '#e8eaf6',
+      color: '#1a237e'
+    }
+  }, q.type.toUpperCase()), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: '#0d1b4b',
+      fontSize: 15,
+      fontWeight: 600,
+      lineHeight: 1.6,
+      marginBottom: q.context ? 12 : 20
+    },
+    className: "hindi"
+  }, q.question), q.context && /*#__PURE__*/React.createElement("div", {
+    className: "rounded-xl p-4 mb-5",
+    style: {
+      background: '#f3e5f5',
+      border: '1px solid #ce93d8'
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "hindi",
+    style: {
+      fontSize: 18,
+      color: '#4a148c'
+    },
+    dangerouslySetInnerHTML: {
+      __html: q.context.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, q.options.map((opt, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    onClick: () => handleSelect(i),
+    className: `option-btn w-full px-4 py-3 rounded-xl text-left flex items-center gap-3 ${selected === null ? '' : 'answered'} ${selected !== null && i === q.correct ? 'correct' : ''} ${selected === i && i !== q.correct ? 'wrong' : ''} ${selected !== null && i !== q.correct && i !== selected ? 'reveal' : ''}`
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 28,
+      height: 28,
+      borderRadius: 7,
+      background: selected === null ? '#e8eaf6' : i === q.correct ? '#2e7d32' : i === selected ? '#c62828' : '#e8eaf6',
+      color: selected === null ? '#555' : i === q.correct || i === selected ? 'white' : '#aaa',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: 12,
+      fontWeight: 700,
+      flexShrink: 0
+    }
+  }, String.fromCharCode(65 + i)), /*#__PURE__*/React.createElement("span", {
+    className: "hindi",
+    style: {
+      fontSize: 16
+    }
+  }, opt), selected !== null && i === q.correct && /*#__PURE__*/React.createElement("span", {
+    className: "ml-auto",
+    style: {
+      color: '#2e7d32'
+    }
+  }, "\u2713"), selected === i && i !== q.correct && /*#__PURE__*/React.createElement("span", {
+    className: "ml-auto",
+    style: {
+      color: '#c62828'
+    }
+  }, "\u2717"))))), showExp && /*#__PURE__*/React.createElement("div", {
+    className: "fade-up bg-white rounded-2xl p-5 mb-4",
+    style: {
+      border: `2px solid ${selected === q.correct ? '#a5d6a7' : '#ef9a9a'}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 mb-2"
+  }, /*#__PURE__*/React.createElement("span", null, selected === q.correct ? '✅' : '❌'), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      color: selected === q.correct ? '#2e7d32' : '#c62828',
+      fontSize: 14
+    }
+  }, selected === q.correct ? 'Correct!' : 'Incorrect')), /*#__PURE__*/React.createElement("p", {
+    className: "hindi",
+    style: {
+      fontSize: 15,
+      color: '#0d1b4b',
+      lineHeight: 1.7,
+      marginBottom: 8
+    },
+    dangerouslySetInnerHTML: {
+      __html: q.explanation.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 1,
+      background: '#e8eaf6',
+      margin: '10px 0'
+    }
+  }), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: '#888',
+      lineHeight: 1.6
+    }
+  }, "\uD83C\uDDEC\uD83C\uDDE7 ", q.explanationEn)), showExp && /*#__PURE__*/React.createElement("button", {
+    onClick: next,
+    className: "fade-up w-full py-3 rounded-xl font-semibold text-white",
+    style: {
+      background: 'linear-gradient(135deg,#1a237e,#ff6f00)',
+      fontSize: 15
+    }
+  }, current < QUIZ_QUESTIONS.length - 1 ? 'Next Question →' : 'See Results →'));
+};
+
+// ─── EXAM PAGE ────────────────────────────────────────────────────────────────
+const ExamPage = () => {
+  const [started, setStarted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(90 * 60);
+  const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  useEffect(() => {
+    if (!started || submitted) return;
+    const t = setInterval(() => setTimeLeft(s => s > 0 ? s - 1 : 0), 1000);
+    return () => clearInterval(t);
+  }, [started, submitted]);
+  const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  const urgent = timeLeft < 600;
+  const score = submitted ? Math.round(Object.entries(answers).filter(([k, v]) => EXAM_QUESTIONS[k].correct === v).length / EXAM_QUESTIONS.length * 100) : 0;
+  const sections = [...new Set(EXAM_QUESTIONS.map(q => q.section))];
+  if (submitted) return /*#__PURE__*/React.createElement("div", {
+    className: "p-4 lg:p-6 max-w-3xl mx-auto"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fade-up bg-white rounded-2xl p-8 text-center mb-6",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 48
+    }
+  }, "\uD83D\uDCCB"), /*#__PURE__*/React.createElement("h2", {
+    className: "display",
+    style: {
+      fontSize: 28,
+      color: '#0d1b4b',
+      marginTop: 8
+    }
+  }, "Exam Paper #4 \u2014 Results"), /*#__PURE__*/React.createElement("div", {
+    className: "display",
+    style: {
+      fontSize: 72,
+      color: score >= 75 ? '#2e7d32' : '#c62828',
+      margin: '8px 0'
+    }
+  }, score, "%"), /*#__PURE__*/React.createElement("div", {
+    className: "badge mx-auto",
+    style: {
+      background: score >= 75 ? '#e8f5e9' : '#ffebee',
+      color: score >= 75 ? '#2e7d32' : '#c62828',
+      fontSize: 14,
+      padding: '6px 16px'
+    }
+  }, score >= 75 ? '✅ Pass' : '❌ Below Pass Mark'), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: '#666',
+      fontSize: 13,
+      marginTop: 12
+    }
+  }, "Pass mark: 75% \xB7 Time taken: ", fmt(90 * 60 - timeLeft))), EXAM_QUESTIONS.map((q, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "fade-up bg-white rounded-xl p-5 mb-3",
+    style: {
+      border: `1px solid ${answers[i] === q.correct ? '#a5d6a7' : '#ef9a9a'}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 mb-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "badge",
+    style: {
+      background: '#e8eaf6',
+      color: '#555',
+      fontSize: 11
+    }
+  }, q.section), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 600,
+      fontSize: 13,
+      color: answers[i] === q.correct ? '#2e7d32' : '#c62828'
+    }
+  }, answers[i] === q.correct ? '✓ Correct' : '✗ Incorrect')), /*#__PURE__*/React.createElement("p", {
+    className: "hindi",
+    style: {
+      fontSize: 15,
+      color: '#0d1b4b',
+      marginBottom: 8
+    },
+    dangerouslySetInnerHTML: {
+      __html: q.q.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 flex-wrap"
+  }, q.options.map((o, j) => /*#__PURE__*/React.createElement("span", {
+    key: j,
+    className: "hindi px-3 py-1 rounded-lg text-sm",
+    style: {
+      background: j === q.correct ? '#e8f5e9' : j === answers[i] && j !== q.correct ? '#ffebee' : '#f5f6fa',
+      color: j === q.correct ? '#2e7d32' : j === answers[i] && j !== q.correct ? '#c62828' : '#555',
+      border: `1px solid ${j === q.correct ? '#a5d6a7' : j === answers[i] && j !== q.correct ? '#ef9a9a' : '#e8eaf6'}`,
+      fontWeight: j === q.correct || j === answers[i] ? 700 : 400
+    }
+  }, o))))));
+  if (!started) return /*#__PURE__*/React.createElement("div", {
+    className: "p-4 lg:p-6 max-w-2xl mx-auto"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fade-up bg-white rounded-2xl p-8 text-center",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 48
+    }
+  }, "\uD83D\uDCCB"), /*#__PURE__*/React.createElement("h2", {
+    className: "display",
+    style: {
+      fontSize: 28,
+      color: '#0d1b4b',
+      margin: '12px 0 4px'
+    }
+  }, "Full Exam Paper #4"), /*#__PURE__*/React.createElement("p", {
+    className: "hindi",
+    style: {
+      color: '#1a237e',
+      fontSize: 16,
+      marginBottom: 20
+    }
+  }, "\u092A\u0930\u0940\u0915\u094D\u0937\u093E \u092A\u0924\u094D\u0930 \u2014 \u0906\u0927\u093E\u0930\u092D\u0942\u0924 \u0938\u094D\u0924\u0930"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-4 mb-8 text-left"
+  }, [['Total Questions', '6 (Demo)'], ['Time Allowed', '90 minutes'], ['Total Marks', '30'], ['Pass Mark', '75%'], ['Sections', 'Grammar, Vocab, Comprehension'], ['Format', 'MOE Exam Style']].map(([k, v]) => /*#__PURE__*/React.createElement("div", {
+    key: k,
+    style: {
+      background: '#f5f6fa',
+      borderRadius: 10,
+      padding: '12px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#888',
+      fontSize: 11,
+      fontWeight: 600
+    }
+  }, k), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#0d1b4b',
+      fontWeight: 700,
+      fontSize: 14,
+      marginTop: 2
+    }
+  }, v)))), /*#__PURE__*/React.createElement("div", {
+    className: "rounded-xl p-4 mb-6",
+    style: {
+      background: '#fff8e1',
+      border: '1px solid #ffe082'
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: '#e65100',
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, "\u26A0\uFE0F Instructions"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: '#555',
+      fontSize: 13,
+      lineHeight: 1.6,
+      marginTop: 4
+    }
+  }, "Timer starts when you click Begin. You must complete the paper in one session. All sections must be attempted. Good luck!")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setStarted(true),
+    className: "w-full py-3.5 rounded-xl font-bold text-white",
+    style: {
+      background: 'linear-gradient(135deg,#1a237e,#ff6f00)',
+      fontSize: 16
+    }
+  }, "Begin Exam Paper \u2192")));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "p-4 lg:p-6 max-w-3xl mx-auto"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sticky top-14 z-10 bg-white rounded-2xl p-4 mb-5 flex items-center gap-4",
+    style: {
+      border: '1px solid #e8eaf6',
+      boxShadow: '0 4px 20px rgba(0,0,0,.08)'
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: '#888',
+      fontWeight: 600
+    }
+  }, "TIME REMAINING"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 28,
+      fontWeight: 800,
+      color: urgent ? '#c62828' : '#1a237e',
+      fontVariantNumeric: 'tabular-nums'
+    },
+    className: urgent ? 'timer-urgent' : ''
+  }, fmt(timeLeft))), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "progress-bar",
+    style: {
+      height: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${timeLeft / (90 * 60) * 100}%`,
+      height: 6,
+      background: urgent ? '#c62828' : 'linear-gradient(90deg,#1a237e,#ff6f00)',
+      borderRadius: 999,
+      transition: 'width 1s linear'
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#888',
+      fontSize: 11,
+      marginTop: 3
+    }
+  }, Object.keys(answers).length, "/", EXAM_QUESTIONS.length, " answered")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSubmitted(true),
+    className: "px-5 py-2 rounded-xl font-semibold text-white",
+    style: {
+      background: 'linear-gradient(135deg,#c62828,#b71c1c)',
+      fontSize: 13,
+      whiteSpace: 'nowrap'
+    }
+  }, "Submit Paper")), sections.map(sec => /*#__PURE__*/React.createElement("div", {
+    key: sec,
+    className: "bg-white rounded-2xl mb-5 overflow-hidden",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "px-6 py-3",
+    style: {
+      background: '#1a237e'
+    }
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "text-white font-bold",
+    style: {
+      fontSize: 14
+    }
+  }, "Section: ", sec)), /*#__PURE__*/React.createElement("div", {
+    className: "p-5 space-y-6"
+  }, EXAM_QUESTIONS.map((q, i) => q.section !== sec ? null : /*#__PURE__*/React.createElement("div", {
+    key: i
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "hindi",
+    style: {
+      fontSize: 15,
+      color: '#0d1b4b',
+      fontWeight: 600,
+      marginBottom: 10
+    },
+    dangerouslySetInnerHTML: {
+      __html: `Q${i + 1}. ` + q.q.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-2"
+  }, q.options.map((o, j) => /*#__PURE__*/React.createElement("button", {
+    key: j,
+    onClick: () => setAnswers(a => ({
+      ...a,
+      [i]: j
+    })),
+    className: "option-btn hindi px-4 py-2.5 rounded-xl text-left text-sm",
+    style: {
+      borderColor: answers[i] === j ? '#1a237e' : '#e8eaf6',
+      background: answers[i] === j ? '#e8eaf6' : 'white',
+      fontWeight: answers[i] === j ? 700 : 400,
+      color: answers[i] === j ? '#1a237e' : '#444'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 800,
+      marginRight: 8
+    }
+  }, String.fromCharCode(65 + j), "."), o)))))))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSubmitted(true),
+    className: "w-full py-3.5 rounded-xl font-bold text-white mb-8",
+    style: {
+      background: 'linear-gradient(135deg,#c62828,#b71c1c)',
+      fontSize: 16
+    }
+  }, "Submit Exam Paper"));
+};
+
+// ─── PROGRESS PAGE ────────────────────────────────────────────────────────────
+const ProgressPage = () => {
+  const weekly = [65, 78, 82, 71, 88, 91, 85];
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const max = Math.max(...weekly);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "p-4 lg:p-6 max-w-4xl mx-auto"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fade-up grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
+  }, [{
+    label: 'Overall Score',
+    value: '82%',
+    sub: '↑ 8% this month',
+    color: '#2e7d32',
+    icon: '📊'
+  }, {
+    label: 'Questions Done',
+    value: '247',
+    sub: '100 this week',
+    color: '#1a237e',
+    icon: '📝'
+  }, {
+    label: 'Papers Taken',
+    value: '8',
+    sub: '50 available',
+    color: '#e65100',
+    icon: '📋'
+  }, {
+    label: 'Day Streak',
+    value: '12 🔥',
+    sub: 'Best: 18 days',
+    color: '#c62828',
+    icon: '🎯'
+  }].map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.label,
+    className: "bg-white rounded-xl p-5",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      marginBottom: 6
+    }
+  }, s.icon), /*#__PURE__*/React.createElement("div", {
+    className: "display",
+    style: {
+      fontSize: 28,
+      color: s.color,
+      lineHeight: 1
+    }
+  }, s.value), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#0d1b4b',
+      fontWeight: 600,
+      fontSize: 12,
+      marginTop: 4
+    }
+  }, s.label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#aaa',
+      fontSize: 11,
+      marginTop: 2
+    }
+  }, s.sub)))), /*#__PURE__*/React.createElement("div", {
+    className: "fade-up-1 bg-white rounded-2xl p-5 mb-6",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontWeight: 700,
+      color: '#0d1b4b',
+      marginBottom: 16,
+      fontSize: 15
+    }
+  }, "Weekly Performance"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-end gap-3",
+    style: {
+      height: 120
+    }
+  }, weekly.map((v, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "flex-1 flex flex-col items-center gap-1"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: v === max ? '#1a237e' : '#888'
+    }
+  }, v, "%"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '100%',
+      height: `${v / 100 * 90}px`,
+      background: v === max ? 'linear-gradient(180deg,#ff6f00,#1a237e)' : 'linear-gradient(180deg,#c5cae9,#9fa8da)',
+      borderRadius: '6px 6px 0 0',
+      transition: 'height .5s ease'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: '#aaa'
+    }
+  }, days[i]))))), /*#__PURE__*/React.createElement("div", {
+    className: "fade-up-2 grid md:grid-cols-2 gap-5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bg-white rounded-2xl p-5",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontWeight: 700,
+      color: '#0d1b4b',
+      marginBottom: 14,
+      fontSize: 15
+    }
+  }, "Module Scores"), [{
+    name: 'Grammar',
+    hindi: 'व्याकरण',
+    score: 82,
+    color: '#1a237e'
+  }, {
+    name: 'Vocabulary',
+    hindi: 'शब्द भंडार',
+    score: 91,
+    color: '#4a148c'
+  }, {
+    name: 'Comprehension',
+    hindi: 'बोधगम्यता',
+    score: 72,
+    color: '#e65100'
+  }, {
+    name: 'Writing',
+    hindi: 'लेखन',
+    score: 68,
+    color: '#2e7d32'
+  }].map(m => /*#__PURE__*/React.createElement("div", {
+    key: m.name,
+    className: "mb-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-between mb-1"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 600,
+      color: '#0d1b4b',
+      fontSize: 13
+    }
+  }, m.name, " ", /*#__PURE__*/React.createElement("span", {
+    className: "hindi",
+    style: {
+      color: '#888',
+      fontSize: 12
+    }
+  }, "(", m.hindi, ")")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      color: m.color,
+      fontSize: 13
+    }
+  }, m.score, "%")), /*#__PURE__*/React.createElement("div", {
+    className: "progress-bar",
+    style: {
+      height: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "progress-fill",
+    style: {
+      width: `${m.score}%`,
+      height: 8,
+      background: `linear-gradient(90deg,${m.color},${m.color}88)`
+    }
+  }))))), /*#__PURE__*/React.createElement("div", {
+    className: "bg-white rounded-2xl p-5",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontWeight: 700,
+      color: '#0d1b4b',
+      marginBottom: 14,
+      fontSize: 15
+    }
+  }, "Achievements"), [{
+    icon: '🏆',
+    label: 'First Paper Done',
+    desc: 'Completed Exam Paper #1',
+    earned: true
+  }, {
+    icon: '🔥',
+    label: '10-Day Streak',
+    desc: 'Studied 10 days in a row',
+    earned: true
+  }, {
+    icon: '⭐',
+    label: 'Grammar Master',
+    desc: 'Score 90%+ in Grammar',
+    earned: false
+  }, {
+    icon: '📚',
+    label: 'Vocab King',
+    desc: 'Complete all 1000 words',
+    earned: false
+  }, {
+    icon: '🎓',
+    label: 'Level Complete',
+    desc: 'Finish Foundational Level',
+    earned: false
+  }].map(a => /*#__PURE__*/React.createElement("div", {
+    key: a.label,
+    className: "flex items-center gap-3 py-2.5 border-b last:border-0",
+    style: {
+      borderColor: '#f0f0f0',
+      opacity: a.earned ? 1 : .45
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 36,
+      height: 36,
+      borderRadius: 9,
+      background: a.earned ? 'linear-gradient(135deg,#ff6f00,#ff9800)' : '#e8eaf6',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: 18
+    }
+  }, a.icon), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      color: '#0d1b4b',
+      fontSize: 13
+    }
+  }, a.label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: '#aaa',
+      fontSize: 11
+    }
+  }, a.desc)), a.earned && /*#__PURE__*/React.createElement("span", {
+    className: "ml-auto badge",
+    style: {
+      background: '#e8f5e9',
+      color: '#2e7d32',
+      fontSize: 11
+    }
+  }, "Earned"))))), /*#__PURE__*/React.createElement("div", {
+    className: "fade-up-3 mt-6 bg-white rounded-2xl p-5",
+    style: {
+      border: '1px solid #e8eaf6'
+    }
+  }, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontWeight: 700,
+      color: '#0d1b4b',
+      marginBottom: 14,
+      fontSize: 15
+    }
+  }, "Worksheets & Resources"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 md:grid-cols-4 gap-3"
+  }, ['Karak Chart', 'Vocabulary List P5', 'Idioms 200+', 'Comprehension Guide', 'Writing Templates', 'Sandhi Rules', 'Proverbs 800+', 'Exam Paper Pack'].map(r => /*#__PURE__*/React.createElement("button", {
+    key: r,
+    className: "card-hover flex flex-col items-center gap-2 p-4 rounded-xl",
+    style: {
+      border: '1px solid #e8eaf6',
+      background: '#f5f6fa'
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "pdf",
+    size: 28
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: '#0d1b4b',
+      textAlign: 'center',
+      lineHeight: 1.3
+    }
+  }, r), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: '#1a237e',
+      fontSize: 10,
+      fontWeight: 600
+    }
+  }, "\u2193 PDF"))))));
+};
+
+// ─── APP ROOT ─────────────────────────────────────────────────────────────────
+const App = () => {
+  const [page, setPage] = useState('landing');
+  const [track, setTrack] = useState('psle');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pageTitle = {
+    dashboard: 'Dashboard',
+    track: 'Track Overview',
+    module: 'Modules',
+    lesson: 'Lesson',
+    quiz: 'Practice Quiz',
+    exam: 'Exam Paper',
+    progress: 'My Progress'
+  };
+  if (page === 'landing') return /*#__PURE__*/React.createElement(LandingPage, {
+    onStart: () => setPage('dashboard')
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    className: "flex"
+  }, /*#__PURE__*/React.createElement(Sidebar, {
+    page: page,
+    setPage: setPage,
+    track: track,
+    sidebarOpen: sidebarOpen,
+    setSidebarOpen: setSidebarOpen
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1 lg:ml-64 min-h-screen",
+    style: {
+      background: '#f5f6fa'
+    }
+  }, /*#__PURE__*/React.createElement(TopBar, {
+    title: pageTitle[page] || 'Aakar Hindi',
+    sidebarOpen: sidebarOpen,
+    setSidebarOpen: setSidebarOpen
+  }), /*#__PURE__*/React.createElement("main", null, page === 'dashboard' && /*#__PURE__*/React.createElement(Dashboard, {
+    setPage: setPage,
+    setTrack: setTrack,
+    track: track
+  }), page === 'track' && /*#__PURE__*/React.createElement(TrackPage, {
+    track: track,
+    setPage: setPage
+  }), page === 'module' && /*#__PURE__*/React.createElement(ModulePage, {
+    setPage: setPage
+  }), page === 'lesson' && /*#__PURE__*/React.createElement(LessonViewer, {
+    setPage: setPage
+  }), page === 'quiz' && /*#__PURE__*/React.createElement(QuizPage, null), page === 'exam' && /*#__PURE__*/React.createElement(ExamPage, null), page === 'progress' && /*#__PURE__*/React.createElement(ProgressPage, null))));
+};
+ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(App, null));
+
+</script>
+</body>
+</html>
