@@ -57,7 +57,7 @@ export default function QuizEngine({ questions, module: mod, topic, onComplete }
         i === currentIndex ? { ...a, selected, submitted: true, correct } : a
       )
     )
-  }, [currentAnswer.submitted, current, currentIndex, fibInput])
+  }, [currentAnswer, current, currentIndex, fibInput])
 
   const handleNext = useCallback(() => {
     if (currentIndex < questions.length - 1) {
