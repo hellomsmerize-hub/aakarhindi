@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy: #0d1b4b;
+  --blue: #1a237e;
+  --blue-mid: #283593;
+  --orange: #ff6f00;
+  --saffron: #ff9800;
+  --cream: #fffde7;
+  --gold: #f9a825;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--navy);
+  color: #e8eaf6;
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 111, 0, 0.4);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 111, 0, 0.7);
+}
+
+/* Typography classes */
+.hindi {
+  font-family: 'Tiro Devanagari Hindi', serif;
+}
+.display {
+  font-family: 'DM Serif Display', serif;
+}
+.yatra {
+  font-family: 'Yatra One', cursive;
+}
+
+/* Dot pattern background */
+.dot-pattern {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Sidebar link active state */
+.sidebar-link {
+  @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-blue-200 transition-all duration-200;
+}
+.sidebar-link:hover {
+  @apply bg-white/10 text-white;
+}
+.sidebar-link.active {
+  @apply bg-orange/20 text-orange border border-orange/30;
+}
+
+/* Card transitions */
+.card {
+  @apply rounded-2xl transition-all duration-200;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(13, 27, 75, 0.2);
+}
+
+/* Progress bar */
+.progress-bar-track {
+  @apply w-full rounded-full overflow-hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+.progress-bar-fill {
+  @apply h-full rounded-full transition-all duration-700 ease-out;
+}
+
+/* Shimmer loading effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Fade-up animations */
+.fade-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.5s ease forwards;
+}
+.fade-up-1 {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.5s ease 0.1s forwards;
+}
+.fade-up-2 {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.5s ease 0.2s forwards;
+}
+.fade-up-3 {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.5s ease 0.3s forwards;
+}
+.fade-up-4 {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.5s ease 0.4s forwards;
+}
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Float animation class */
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Glass card */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Orange glow */
+.orange-glow {
+  box-shadow: 0 0 24px rgba(255, 111, 0, 0.3);
+}
+
+/* Input styles */
+.input-field {
+  @apply w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-orange/60 focus:border-transparent transition-all duration-200;
+}
+
+/* Badge */
+.badge-psle {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-mid text-blue-100 border border-blue-600/40;
+}
+.badge-olevel {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange/20 text-orange border border-orange/40;
+}
+
+/* Table styles */
+.data-table th {
+  @apply text-left text-xs font-semibold text-white/50 uppercase tracking-wider px-4 py-3;
+}
+.data-table td {
+  @apply px-4 py-4 text-sm text-white/80;
+}
+.data-table tr {
+  @apply border-b border-white/5 hover:bg-white/5 transition-colors duration-150;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .fade-up-1, .fade-up-2, .fade-up-3, .fade-up-4 {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .shimmer {
+    animation: none;
+  }
+  .float {
+    animation: none;
+  }
+}
