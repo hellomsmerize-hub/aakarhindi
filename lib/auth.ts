@@ -2,7 +2,9 @@ import jwt from 'jsonwebtoken'
 import { cookies } from 'next/headers'
 import type { AuthPayload } from './types'
 
-const JWT_SECRET = process.env.JWT_SECRET!
+// Fallback keeps the demo working when JWT_SECRET isn't set in the host env
+// (e.g. Vercel, since .env.local is gitignored). Set JWT_SECRET in prod for real security.
+const JWT_SECRET = process.env.JWT_SECRET || 'aakar-hindi-demo-fallback-secret-change-me-in-prod'
 export const COOKIE_NAME = 'aakar_token'
 const MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 
